@@ -1,16 +1,18 @@
 import express from "express";
 import { Note } from "../schemas/note.js";
 import { User } from "../schemas/User.js";
+import { requireAuthorization } from "../middleware/authorizationToken.js";
+import jwt from "jsonwebtoken";
 
 const notesRouter = express.Router();
 
-notesRouter.get("/", (req, res) => {
+notesRouter.get("/", requireAuthorization, (req, res) => {
   Note.find({}).then((notes) => {
     res.json(notes);
   });
 });
 
-notesRouter.get("/:id", async (req, res, next) => {
+notesRouter.get("/:id", requireAuthorization, async (req, res, next) => {
   const { id } = req.params;
   try {
     const note = await Note.findById(id);
@@ -26,15 +28,20 @@ notesRouter.get("/:id", async (req, res, next) => {
   }
 });
 
-notesRouter.post("/", async (req, res) => {
+notesRouter.post("/", requireAuthorization, async (req, res) => {
   const note = req.body;
+  const authHeader = req.headers["authorization"];
+
+  const token = authHeader && authHeader.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.SECRET);
+
   if (!note) {
     return res.status(400).json({
       error: "note.content is missing",
     });
   }
   try {
-    const user = await User.findById(note.user);
+    const user = await User.findById(decodedToken.id);
     const newNote = new Note({
       content: note.content,
       important: note.important || false,
@@ -55,7 +62,7 @@ notesRouter.post("/", async (req, res) => {
   }
 });
 
-notesRouter.delete("/:id", async (req, res, next) => {
+notesRouter.delete("/:id", requireAuthorization, async (req, res, next) => {
   const { id } = req.params;
   try {
     const note = await Note.findByIdAndDelete(id);
@@ -71,7 +78,7 @@ notesRouter.delete("/:id", async (req, res, next) => {
   }
 });
 
-notesRouter.put("/:id", async (req, res, next) => {
+notesRouter.put("/:id", requireAuthorization, async (req, res, next) => {
   const { id } = req.params;
   const note = req.body;
   if (!note || !note.content) {

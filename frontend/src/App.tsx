@@ -1,13 +1,18 @@
+import { Toaster } from "react-hot-toast";
 import {
   createBrowserRouter,
   RouterProvider,
   LoaderFunction,
   ActionFunction,
 } from "react-router-dom";
+import WrapAuthValidation from "./components/WrapAuthValidation";
+//
+import { store } from "./redux/store";
+import { Provider } from "react-redux";
 
 interface IRoute {
   path: string;
-  Element: JSX.Element;
+  Element: any;
   loader?: LoaderFunction;
   action?: ActionFunction;
   ErrorBoundary?: JSX.Element;
@@ -43,14 +48,27 @@ const router = createBrowserRouter(
   routes.map(({ Element, ErrorBoundary, ...rest }) => ({
     ...rest,
     // @ts-ignore
-    element: <Element />,
+    element: (
+      <WrapAuthValidation>
+        <Element />
+      </WrapAuthValidation>
+    ),
     // @ts-ignore
     ...(ErrorBoundary && { errorElement: <ErrorBoundary /> }),
   }))
 );
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <Provider store={store}>
+        <Toaster />
+        <div className="relative">
+          <RouterProvider router={router} />
+        </div>
+      </Provider>
+    </>
+  );
 };
 
 export default App;

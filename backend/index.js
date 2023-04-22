@@ -9,6 +9,9 @@ import { notFound } from "./middleware/notFound.js";
 // routes
 import notesRouter from "./controllers/notes.js";
 import usersRouter from "./controllers/users.js";
+import loginRoutes from "./controllers/login.js";
+import transactionsRouter from "./controllers/transactions.js";
+import profileRouter from "./controllers/profile.js";
 
 // connect to mongoDB
 import "./lib/mongo.js";
@@ -22,6 +25,9 @@ app.use(express.json());
 // routes
 app.use("/api/notes", notesRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/auth", loginRoutes);
+app.use("/api/transactions", transactionsRouter);
+app.use("/api/profile", profileRouter);
 
 // middleware para manejar errores
 app.use(notFound);

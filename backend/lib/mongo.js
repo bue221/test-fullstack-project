@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 
-const url_connection =
-  "mongodb+srv://db_user:GHmn798@cluster0.zmpzx.mongodb.net/?retryWrites=true&w=majority";
-
+const url_connection = process.env.MONGODB_URI;
 // connect to the database
 mongoose
   .connect(url_connection, {
